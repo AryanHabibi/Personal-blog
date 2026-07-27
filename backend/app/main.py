@@ -3,7 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database.database import Base, engine
-from app.models import Blog, User  # noqa: F401
+from app.models.blog import Blog
+from app.models.user import User
 
 
 @asynccontextmanager
