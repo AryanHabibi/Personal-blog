@@ -28,5 +28,20 @@ class Settings:
         )
     )
 
+    ADMIN_USERNAME: str = os.getenv(
+        "ADMIN_USERNAME",
+        "admin",
+    )
+
+    ADMIN_EMAIL: str = os.getenv(
+        "ADMIN_EMAIL",
+        "admin@example.com",
+    )
+
+    ADMIN_PASSWORD: str = os.getenv(
+        "ADMIN_PASSWORD",
+        "Admin123!",
+    )
+
 
 settings = Settings()

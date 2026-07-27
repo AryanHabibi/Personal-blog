@@ -1,24 +1,35 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.auth import router as auth_router
-from app.database.database import Base, engine
-
-# Import the models before create_all() so SQLAlchemy knows about them.
+from app.api.blogs import router as blogs_router
+from app.database.database import Base, SessionLocal, engine
 from app.models.blog import Blog  # noqa: F401
 from app.models.user import User  # noqa: F401
+from app.services.seed_service import seed_admin_user
+
+
+UPLOAD_DIRECTORY = Path("app/uploads")
+UPLOAD_DIRECTORY.mkdir(
+    parents=True,
+    exist_ok=True,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Run application startup and shutdown tasks.
-
-    During startup, create any database tables that do not exist yet.
-    """
-
     Base.metadata.create_all(bind=engine)
+
+    db = SessionLocal()
+
+    try:
+        seed_admin_user(db)
+    finally:
+        db.close()
 
     yield
 
@@ -31,8 +42,29 @@ app = FastAPI(
 )
 
 
-# Register API routers.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://127.0.0.1:3000",
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory=UPLOAD_DIRECTORY),
+    name="uploads",
+)
+
+
 app.include_router(auth_router)
+app.include_router(blogs_router)
 
 
 @app.get(
@@ -41,10 +73,6 @@ app.include_router(auth_router)
     summary="API root",
 )
 def root() -> dict[str, str]:
-    """
-    Return a simple message confirming that the API is running.
-    """
-
     return {
         "message": "Welcome to Blog Management API",
     }
@@ -56,10 +84,6 @@ def root() -> dict[str, str]:
     summary="Health check",
 )
 def health() -> dict[str, str]:
-    """
-    Return the current application health status.
-    """
-
     return {
         "status": "healthy",
     }

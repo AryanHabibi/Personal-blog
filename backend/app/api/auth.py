@@ -1,11 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import (
+    get_current_admin,
+    get_current_user,
+)
 from app.models.user import User
 from app.schemas.auth import TokenResponse
 from app.schemas.user import UserCreate, UserResponse
@@ -14,7 +17,6 @@ from app.services.auth_service import (
     generate_user_token,
     register_user,
 )
-
 
 router = APIRouter(
     prefix="/auth",
@@ -26,17 +28,13 @@ router = APIRouter(
     "/register",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Register a regular user",
 )
 def register(
     user_data: UserCreate,
     db: Annotated[Session, Depends(get_db)],
-) -> User:
+):
     """
-    Create a new regular user account.
-
-    The role is assigned as `user` by the authentication service.
-    A client cannot register itself as an administrator.
+    Register a new user.
     """
 
     return register_user(
@@ -48,21 +46,19 @@ def register(
 @router.post(
     "/login",
     response_model=TokenResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Log in and receive a JWT token",
 )
 def login(
     form_data: Annotated[
         OAuth2PasswordRequestForm,
         Depends(),
     ],
-    db: Annotated[Session, Depends(get_db)],
-) -> TokenResponse:
+    db: Annotated[
+        Session,
+        Depends(get_db),
+    ],
+):
     """
-    Authenticate using a username or email and password.
-
-    Although Swagger labels the first field as `username`, this application
-    accepts either a username or an email address in that field.
+    Login using username and password.
     """
 
     user = authenticate_user(
@@ -71,10 +67,16 @@ def login(
         password=form_data.password,
     )
 
-    access_token = generate_user_token(user)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username/email or password.",
+        )
+
+    token = generate_user_token(user)
 
     return TokenResponse(
-        access_token=access_token,
+        access_token=token,
         token_type="bearer",
     )
 
@@ -82,19 +84,32 @@ def login(
 @router.get(
     "/me",
     response_model=UserResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Get the current user",
 )
 def get_my_profile(
     current_user: Annotated[
         User,
         Depends(get_current_user),
     ],
-) -> User:
+):
     """
-    Return the account information for the currently authenticated user.
-
-    A valid Bearer JWT token is required.
+    Return currently authenticated user.
     """
 
     return current_user
+
+
+@router.get(
+    "/admin-check",
+    response_model=UserResponse,
+)
+def admin_check(
+    current_admin: Annotated[
+        User,
+        Depends(get_current_admin),
+    ],
+):
+    """
+    Test endpoint to verify admin authorization.
+    """
+
+    return current_admin
