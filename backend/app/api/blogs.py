@@ -15,7 +15,10 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.dependencies import get_current_admin
 from app.models.user import User
-from app.schemas.blog import BlogResponse
+from app.schemas.blog import (
+    BlogListResponse,
+    BlogResponse,
+)
 from app.services.blog_service import (
     create_new_blog,
     delete_existing_blog,
@@ -37,23 +40,57 @@ router = APIRouter(
     status_code=status.HTTP_200_OK,
     summary="Get all blogs",
 )
+@router.get(
+    "",
+    response_model=BlogListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get and search blogs",
+)
 def get_blogs(
     db: Annotated[Session, Depends(get_db)],
-    skip: Annotated[int, Query(ge=0)] = 0,
-    limit: Annotated[int, Query(ge=1, le=100)] = 20,
-):
-    """
-    Return published blogs.
-
-    Authentication is not required.
-    """
-
-    return list_blogs(
+    page: Annotated[
+        int,
+        Query(
+            ge=1,
+            description="Page number",
+        ),
+    ] = 1,
+    page_size: Annotated[
+        int,
+        Query(
+            ge=1,
+            le=100,
+            description="Number of blogs per page",
+        ),
+    ] = 10,
+    search: Annotated[
+        str | None,
+        Query(
+            min_length=1,
+            max_length=100,
+            description=(
+                "Search blog titles, content, "
+                "and author usernames"
+            ),
+        ),
+    ] = None,
+) -> BlogListResponse:
+    blogs, total_items = list_blogs(
         db,
-        skip=skip,
-        limit=limit,
+        page=page,
+        page_size=page_size,
+        search=search,
     )
 
+    return BlogListResponse.build(
+        items=[
+            BlogResponse.model_validate(blog)
+            for blog in blogs
+        ],
+        page=page,
+        page_size=page_size,
+        total_items=total_items,
+    )
 
 @router.get(
     "/{blog_id}",

@@ -7,13 +7,13 @@ from sqlalchemy.orm import Session
 
 from app.models.blog import Blog
 from app.repositories.blog_repository import (
+    count_blogs,
     create_blog,
     delete_blog,
     get_all_blogs,
     get_blog_by_id,
     update_blog,
 )
-
 
 UPLOAD_DIRECTORY = Path("app/uploads")
 
@@ -38,14 +38,25 @@ MAX_IMAGE_SIZE = 5 * 1024 * 1024
 def list_blogs(
     db: Session,
     *,
-    skip: int = 0,
-    limit: int = 20,
-) -> list[Blog]:
-    return get_all_blogs(
+    page: int = 1,
+    page_size: int = 10,
+    search: str | None = None,
+) -> tuple[list[Blog], int]:
+    offset = (page - 1) * page_size
+
+    blogs = get_all_blogs(
         db,
-        skip=skip,
-        limit=limit,
+        offset=offset,
+        limit=page_size,
+        search=search,
     )
+
+    total_items = count_blogs(
+        db,
+        search=search,
+    )
+
+    return blogs, total_items
 
 
 def retrieve_blog(
