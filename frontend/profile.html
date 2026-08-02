@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Profile | Blog Management</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header class="site-header">
+    <a class="site-brand" href="index.html">
+        <span class="brand-icon">B</span>
+
+        <span>
+            <strong>Blog Management</strong>
+            <small>Your account</small>
+        </span>
+    </a>
+
+    <nav class="header-actions">
+        <a
+            class="secondary-link"
+            href="index.html"
+        >
+            Home
+        </a>
+
+        <a
+            id="dashboard-link"
+            class="secondary-link hidden"
+            href="dashboard.html"
+        >
+            Dashboard
+        </a>
+
+        <button
+            id="logout-button"
+            type="button"
+        >
+            Logout
+        </button>
+    </nav>
+</header>
+
+
+<main class="page-container profile-page">
+
+    <p id="profile-message">
+        Loading profile...
+    </p>
+
+    <section
+        id="profile-card"
+        class="profile-card hidden"
+    >
+        <div class="profile-avatar">
+            <span id="profile-initial">U</span>
+        </div>
+
+        <div class="profile-main">
+            <span class="auth-badge">
+                Account profile
+            </span>
+
+            <h1 id="profile-username"></h1>
+
+            <p id="profile-role" class="profile-role"></p>
+
+            <div class="profile-details">
+                <article>
+                    <span>Email</span>
+                    <strong id="profile-email"></strong>
+                </article>
+
+                <article>
+                    <span>Role</span>
+                    <strong id="profile-role-value"></strong>
+                </article>
+
+                <article>
+                    <span>Joined</span>
+                    <strong id="profile-created-at"></strong>
+                </article>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+
+<script src="js/api.js"></script>
+<script src="js/profile.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Blog Management</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header class="site-header home-header">
+    <a class="site-brand" href="index.html">
+        <span class="brand-icon">B</span>
+
+        <span>
+            <strong>Blog Management</strong>
+            <small>Discover ideas worth reading</small>
+        </span>
+    </a>
+
+    <nav class="header-actions">
+        <a
+            class="nav-link"
+            href="index.html"
+        >
+            Home
+        </a>
+
+        <a
+            id="dashboard-link"
+            class="nav-link hidden"
+            href="dashboard.html"
+        >
+            Dashboard
+        </a>
+
+        <a
+            id="create-blog-link"
+            class="primary-link hidden"
+            href="create-blog.html"
+        >
+            Create blog
+        </a>
+
+        <a
+            id="login-link"
+            class="nav-link"
+            href="login.html"
+        >
+            Login
+        </a>
+
+        <a
+            id="register-link"
+            class="primary-link"
+            href="register.html"
+        >
+            Register
+        </a>
+        <a
+            id="profile-link"
+            class="nav-link hidden"
+            href="profile.html"
+        >
+            Profile
+        </a>
+        
+        <button
+            id="logout-button"
+            class="outline-button hidden"
+            type="button"
+        >
+            Logout
+        </button>
+    </nav>
+</header>
+
+
+<main>
+    <section class="hero-section">
+        <div class="hero-content">
+            <span class="hero-label">
+                Stories, tutorials and new ideas
+            </span>
+
+            <h1>
+                Read something meaningful today.
+            </h1>
+
+            <p>
+                Explore articles written by our community,
+                discover new topics and join the conversation.
+            </p>
+
+            <div class="hero-user-row">
+                <p id="welcome-message">
+                    Loading your account...
+                </p>
+            </div>
+
+            <div class="hero-search">
+                <input
+                    id="search-input"
+                    type="search"
+                    placeholder="Search by title, content or author..."
+                    aria-label="Search blogs"
+                >
+
+                <button
+                    id="search-button"
+                    type="button"
+                >
+                    Search
+                </button>
+            </div>
+        </div>
+
+        <div class="hero-decoration" aria-hidden="true">
+            <div class="floating-card floating-card-one">
+                <span>FastAPI</span>
+                <strong>Build better APIs</strong>
+            </div>
+
+            <div class="floating-card floating-card-two">
+                <span>Community</span>
+                <strong>Share your ideas</strong>
+            </div>
+
+            <div class="hero-circle"></div>
+        </div>
+    </section>
+
+
+    <section class="home-layout page-container">
+        <aside class="categories-panel">
+            <div class="panel-heading">
+                <div>
+                    <span class="section-label">Explore</span>
+                    <h2>Categories</h2>
+                </div>
+
+                <button
+                    id="clear-category-button"
+                    class="text-button hidden"
+                    type="button"
+                >
+                    Clear
+                </button>
+            </div>
+
+            <p id="categories-message">
+                Loading categories...
+            </p>
+
+            <div
+                id="categories-container"
+                class="category-chips"
+            ></div>
+        </aside>
+
+
+        <div class="content-column">
+            <section
+                id="featured-section"
+                class="featured-section hidden"
+            >
+                <div class="section-heading">
+                    <div>
+                        <span class="section-label">Featured</span>
+                        <h2>Start with this article</h2>
+                    </div>
+                </div>
+
+                <div id="featured-blog-container"></div>
+            </section>
+
+
+            <section class="latest-section">
+                <div class="section-heading latest-heading">
+                    <div>
+                        <span class="section-label">Latest stories</span>
+                        <h2 id="articles-title">Recent articles</h2>
+                    </div>
+
+                    <span
+                        id="articles-count"
+                        class="result-count"
+                    ></span>
+                </div>
+
+                <div id="blogs-loading" class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading articles...</p>
+                </div>
+
+                <div
+                    id="blogs-empty"
+                    class="empty-state hidden"
+                >
+                    <div class="empty-icon">📚</div>
+                    <h3>No articles found</h3>
+                    <p>
+                        Try another search term or select
+                        a different category.
+                    </p>
+                </div>
+
+                <p
+                    id="blogs-message"
+                    class="error-message"
+                ></p>
+
+                <div
+                    id="blogs-container"
+                    class="blogs-grid"
+                ></div>
+
+                <nav
+                    id="pagination"
+                    class="pagination hidden"
+                    aria-label="Blog pagination"
+                >
+                    <button
+                        id="previous-page-button"
+                        class="outline-button"
+                        type="button"
+                    >
+                        Previous
+                    </button>
+
+                    <span id="pagination-message">
+                        Page 1
+                    </span>
+
+                    <button
+                        id="next-page-button"
+                        class="outline-button"
+                        type="button"
+                    >
+                        Next
+                    </button>
+                </nav>
+            </section>
+        </div>
+    </section>
+</main>
+
+
+<footer class="site-footer">
+    <div>
+        <strong>Blog Management</strong>
+
+        <p>
+            A full-stack blog platform built with FastAPI
+            and vanilla JavaScript.
+        </p>
+    </div>
+
+    <p>
+        © <span id="current-year"></span> Blog Management
+    </p>
+</footer>
+
+
+<script src="js/api.js"></script>
+<script src="js/index.js"></script>
+
+</body>
+</html>

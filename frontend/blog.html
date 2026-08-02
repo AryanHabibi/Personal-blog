@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Blog | Blog Management</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div>
+            <h1>Blog Management</h1>
+            <p id="blog-page-user">Loading account...</p>
+        </div>
+
+        <nav class="header-actions">
+            <a class="secondary-link" href="index.html">
+                Home
+            </a>
+
+            <a
+                id="dashboard-link"
+                class="secondary-link hidden"
+                href="dashboard.html"
+            >
+                Dashboard
+            </a>
+
+            <button id="logout-button" type="button">
+                Logout
+            </button>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <p id="blog-message">Loading blog...</p>
+
+        <article id="blog-details" class="blog-details hidden">
+            <img
+                id="blog-image"
+                class="blog-details-image hidden"
+                alt=""
+            >
+
+            <div class="blog-details-content">
+                <div class="blog-details-meta">
+                    <span id="blog-category">
+                        Uncategorized
+                    </span>
+
+                    <span id="blog-author"></span>
+
+                    <span id="blog-views"></span>
+                </div>
+
+                <h2 id="blog-title"></h2>
+
+                <p id="blog-date" class="blog-date"></p>
+
+                <div id="blog-content" class="blog-body"></div>
+            </div>
+        </article>
+
+        <section class="comments-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Comments</h2>
+                    <p>Join the conversation.</p>
+                </div>
+            </div>
+
+            <form id="comment-form" class="comment-form">
+                <textarea
+                    id="comment-content"
+                    rows="4"
+                    maxlength="1000"
+                    placeholder="Write a comment..."
+                    required
+                ></textarea>
+
+                <button
+                    id="comment-button"
+                    class="primary-button"
+                    type="submit"
+                >
+                    Add comment
+                </button>
+
+                <p
+                    id="comment-message"
+                    class="form-message"
+                    aria-live="polite"
+                ></p>
+            </form>
+
+            <p id="comments-message">Loading comments...</p>
+
+            <div id="comments-container" class="comments-list"></div>
+        </section>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/blog.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin Dashboard | Blog Management</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div>
+            <h1>Admin Dashboard</h1>
+
+            <p id="admin-welcome">
+                Checking admin access...
+            </p>
+        </div>
+
+        <nav class="header-actions">
+            <a
+                class="secondary-link"
+                href="index.html"
+            >
+                View website
+            </a>
+
+            <a
+                class="primary-link"
+                href="create-blog.html"
+            >
+                Create blog
+            </a>
+
+            <button
+                id="logout-button"
+                type="button"
+            >
+                Logout
+            </button>
+        </nav>
+    </header>
+
+    <main class="page-container">
+
+        <section class="dashboard-summary">
+
+            <article class="summary-card">
+                <span>Total blogs</span>
+                <strong id="total-blogs">0</strong>
+            </article>
+
+            <article class="summary-card">
+                <span>Total categories</span>
+                <strong id="total-categories">0</strong>
+            </article>
+
+        </section>
+
+        <section class="dashboard-section">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Manage blogs</h2>
+
+                    <p>
+                        Create, view, edit, and delete blog posts.
+                    </p>
+                </div>
+            </div>
+
+            <p id="dashboard-message">
+                Loading blogs...
+            </p>
+
+            <div class="table-wrapper">
+
+                <table class="dashboard-table">
+
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Category</th>
+                            <th>Views</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="blogs-table-body"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+        
+        <section class="dashboard-section category-management">
+            
+            <div class="section-heading">
+                <div>
+                    <h2>Manage categories</h2>
+                    <p>Create and delete blog categories.</p>
+                </div>
+            </div>
+
+                <form id="category-form" class="category-form">
+                    <input
+                        id="category-name"
+                        type="text"
+                        minlength="2"
+                        maxlength="50"
+                        placeholder="New category name"
+                        required
+                    >
+
+                <button
+                    id="category-button"
+                    class="primary-button"
+                    type="submit"
+                >
+                    Add category
+                </button>
+                </form>
+
+                <p
+                    id="category-message"
+                    class="form-message"
+                    aria-live="polite"
+                ></p>
+
+            <div
+                id="categories-container"
+                class="categories-list"
+            ></div>
+        </section>
+
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

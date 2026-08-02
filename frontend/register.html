@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Login | Blog Management</title>
+    <title>Register | Blog Management</title>
 
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -16,29 +17,48 @@
 
     <main class="auth-container">
         <section class="auth-card">
-            <div class="auth-brand">
-                <span class="auth-badge">Blog Management</span>
 
-                <h1>Welcome back</h1>
+            <div class="auth-brand">
+                <span class="auth-badge">
+                    Blog Management
+                </span>
+
+                <h1>Create account</h1>
 
                 <p>
-                    Sign in to read blogs, leave comments,
-                    and manage your account.
+                    Join the platform to read blogs
+                    and leave comments.
                 </p>
             </div>
 
-            <form id="login-form" class="auth-form">
+            <form id="register-form" class="auth-form">
+
                 <div class="form-group">
                     <label for="username">
-                        Username or email
+                        Username
                     </label>
 
                     <input
                         id="username"
                         name="username"
                         type="text"
+                        placeholder="Choose a username"
                         autocomplete="username"
-                        placeholder="Enter your username or email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
                         required
                     >
                 </div>
@@ -52,35 +72,36 @@
                         id="password"
                         name="password"
                         type="password"
-                        autocomplete="current-password"
-                        placeholder="Enter your password"
+                        placeholder="Create a password"
+                        autocomplete="new-password"
                         required
                     >
                 </div>
 
                 <button
-                    id="login-button"
+                    id="register-button"
                     class="primary-button"
                     type="submit"
                 >
-                    Login
+                    Create account
                 </button>
 
                 <p
-                    id="login-message"
+                    id="register-message"
                     class="form-message"
                     aria-live="polite"
                 ></p>
             </form>
 
             <p class="auth-footer">
-                New here?
-                <a href="register.html">Create an account</a>
+                Already have an account?
+                <a href="login.html">Log in</a>
             </p>
+
         </section>
     </main>
 
     <script src="js/api.js"></script>
-    <script src="js/login.js"></script>
+    <script src="js/register.js"></script>
 </body>
 </html>

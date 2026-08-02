@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Edit Blog | Blog Management</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div>
+            <h1>Edit Blog</h1>
+
+            <p id="page-user-message">
+                Checking admin access...
+            </p>
+        </div>
+
+        <nav class="header-actions">
+            <a
+                class="secondary-link"
+                href="dashboard.html"
+            >
+                Dashboard
+            </a>
+
+            <a
+                id="view-blog-link"
+                class="secondary-link hidden"
+                href="#"
+            >
+                View blog
+            </a>
+
+            <a
+                class="secondary-link"
+                href="index.html"
+            >
+                View website
+            </a>
+
+            <button
+                id="logout-button"
+                type="button"
+            >
+                Logout
+            </button>
+        </nav>
+    </header>
+
+    <main class="page-container">
+
+        <p id="page-message">
+            Loading blog...
+        </p>
+
+        <section
+            id="edit-blog-section"
+            class="editor-card hidden"
+        >
+            <form
+                id="edit-blog-form"
+                class="editor-form"
+                enctype="multipart/form-data"
+            >
+                <div class="form-group">
+                    <label for="title">
+                        Title
+                    </label>
+
+                    <input
+                        id="title"
+                        name="title"
+                        type="text"
+                        minlength="3"
+                        maxlength="200"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="content">
+                        Content
+                    </label>
+
+                    <textarea
+                        id="content"
+                        name="content"
+                        rows="12"
+                        minlength="10"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="category-id">
+                        Category
+                    </label>
+
+                    <select
+                        id="category-id"
+                        name="category_id"
+                        required
+                    >
+                        <option value="">
+                            Loading categories...
+                        </option>
+                    </select>
+                </div>
+
+                <div
+                    id="current-image-section"
+                    class="current-image-section hidden"
+                >
+                    <p class="field-label">
+                        Current image
+                    </p>
+
+                    <img
+                        id="current-image"
+                        class="current-blog-image"
+                        alt="Current blog image"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="image">
+                        Replace image
+                    </label>
+
+                    <input
+                        id="image"
+                        name="image"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                    >
+
+                    <small class="field-help">
+                        Leave this empty to keep the existing image.
+                    </small>
+                </div>
+
+                <button
+                    id="update-blog-button"
+                    class="primary-button"
+                    type="submit"
+                >
+                    Save changes
+                </button>
+
+                <p
+                    id="edit-blog-message"
+                    class="form-message"
+                    aria-live="polite"
+                ></p>
+            </form>
+        </section>
+
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/edit-blog.js"></script>
+</body>
+</html>
