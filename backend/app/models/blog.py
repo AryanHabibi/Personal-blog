@@ -3,13 +3,23 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
+from app.models.category import Category
 
 if TYPE_CHECKING:
+    from app.models.category import Category
     from app.models.user import User
+    from app.models.comment import Comment
 
 
 class Blog(Base):
@@ -36,6 +46,22 @@ class Blog(Base):
         nullable=True,
     )
 
+    view_count: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        server_default="0",
+        nullable=False,
+    )
+
+    category_id: Mapped[int | None] = mapped_column(
+        ForeignKey(
+            "categories.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -50,11 +76,23 @@ class Blog(Base):
     )
 
     author_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
+        ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
         index=True,
     )
 
     author: Mapped["User"] = relationship(
         back_populates="blogs",
+    )
+
+    category: Mapped["Category | None"] = relationship(
+        back_populates="blogs",
+    )
+    
+    comments: Mapped[list["Comment"]] = relationship(
+        back_populates="blog",
+        cascade="all, delete-orphan",
     )

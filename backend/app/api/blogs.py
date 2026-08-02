@@ -15,10 +15,7 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.dependencies import get_current_admin
 from app.models.user import User
-from app.schemas.blog import (
-    BlogListResponse,
-    BlogResponse,
-)
+from app.schemas.blog import BlogListResponse, BlogResponse
 from app.services.blog_service import (
     create_new_blog,
     delete_existing_blog,
@@ -36,18 +33,15 @@ router = APIRouter(
 
 @router.get(
     "",
-    response_model=list[BlogResponse],
-    status_code=status.HTTP_200_OK,
-    summary="Get all blogs",
-)
-@router.get(
-    "",
     response_model=BlogListResponse,
     status_code=status.HTTP_200_OK,
     summary="Get and search blogs",
 )
 def get_blogs(
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[
+        Session,
+        Depends(get_db),
+    ],
     page: Annotated[
         int,
         Query(
@@ -74,12 +68,32 @@ def get_blogs(
             ),
         ),
     ] = None,
+    category_id: Annotated[
+        int | None,
+        Query(
+            ge=1,
+            description="Filter blogs by category ID",
+        ),
+    ] = None,
 ) -> BlogListResponse:
+    """
+    Return a paginated list of blogs.
+
+    The optional search value checks:
+
+    - Blog titles
+    - Blog content
+    - Author usernames
+
+    Authentication is not required.
+    """
+
     blogs, total_items = list_blogs(
         db,
         page=page,
         page_size=page_size,
         search=search,
+        category_id=category_id,
     )
 
     return BlogListResponse.build(
@@ -92,6 +106,7 @@ def get_blogs(
         total_items=total_items,
     )
 
+
 @router.get(
     "/{blog_id}",
     response_model=BlogResponse,
@@ -100,15 +115,22 @@ def get_blogs(
 )
 def get_blog(
     blog_id: int,
-    db: Annotated[Session, Depends(get_db)],
-):
+    db: Annotated[
+        Session,
+        Depends(get_db),
+    ],
+) -> BlogResponse:
     """
     Return one blog by its database ID.
 
     Authentication is not required.
     """
 
-    return retrieve_blog(db, blog_id)
+    return retrieve_blog(
+        db,
+        blog_id,
+        increase_views=True,
+    )
 
 
 @router.post(
@@ -120,13 +142,21 @@ def get_blog(
 def create_blog(
     title: Annotated[
         str,
-        Form(min_length=3, max_length=200),
+        Form(
+            min_length=3,
+            max_length=200,
+        ),
     ],
     content: Annotated[
         str,
-        Form(min_length=10),
+        Form(
+            min_length=10,
+        ),
     ],
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[
+        Session,
+        Depends(get_db),
+    ],
     current_admin: Annotated[
         User,
         Depends(get_current_admin),
@@ -135,11 +165,15 @@ def create_blog(
         UploadFile | None,
         File(),
     ] = None,
-):
+    category_id: Annotated[
+        int | None,
+        Form(),
+    ] = None,
+) -> BlogResponse:
     """
     Create a new blog using multipart form data.
 
-    Only administrators can access this endpoint.
+    Only an administrator can access this endpoint.
     """
 
     return create_new_blog(
@@ -148,6 +182,7 @@ def create_blog(
         content=content,
         image=image,
         author_id=current_admin.id,
+        category_id=category_id,
     )
 
 
@@ -161,13 +196,21 @@ def update_blog(
     blog_id: int,
     title: Annotated[
         str,
-        Form(min_length=3, max_length=200),
+        Form(
+            min_length=3,
+            max_length=200,
+        ),
     ],
     content: Annotated[
         str,
-        Form(min_length=10),
+        Form(
+            min_length=10,
+        ),
     ],
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[
+        Session,
+        Depends(get_db),
+    ],
     current_admin: Annotated[
         User,
         Depends(get_current_admin),
@@ -176,12 +219,20 @@ def update_blog(
         UploadFile | None,
         File(),
     ] = None,
-):
+    category_id: Annotated[
+        int | None,
+        Form(),
+    ] = None,
+        
+) -> BlogResponse:
     """
-    Update a blog.
+    Update an existing blog.
 
     Uploading a new image replaces the existing image.
+
     Leaving the image field empty keeps the current image.
+
+    Only an administrator can access this endpoint.
     """
 
     return update_existing_blog(
@@ -190,6 +241,7 @@ def update_blog(
         title=title,
         content=content,
         image=image,
+        category_id=category_id,
     )
 
 
@@ -200,7 +252,10 @@ def update_blog(
 )
 def delete_blog(
     blog_id: int,
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[
+        Session,
+        Depends(get_db),
+    ],
     current_admin: Annotated[
         User,
         Depends(get_current_admin),
@@ -209,10 +264,13 @@ def delete_blog(
     """
     Delete a blog and its associated uploaded image.
 
-    Only administrators can access this endpoint.
+    Only an administrator can access this endpoint.
     """
 
-    delete_existing_blog(db, blog_id)
+    delete_existing_blog(
+        db,
+        blog_id,
+    )
 
     return Response(
         status_code=status.HTTP_204_NO_CONTENT,

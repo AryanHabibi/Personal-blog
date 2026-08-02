@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
+from app.repositories.category_repository import get_category_by_id
 
 from app.models.blog import Blog
 from app.repositories.blog_repository import (
@@ -13,6 +14,7 @@ from app.repositories.blog_repository import (
     get_all_blogs,
     get_blog_by_id,
     update_blog,
+    increment_blog_views,
 )
 
 UPLOAD_DIRECTORY = Path("app/uploads")
@@ -41,19 +43,31 @@ def list_blogs(
     page: int = 1,
     page_size: int = 10,
     search: str | None = None,
+    category_id: int | None = None,
 ) -> tuple[list[Blog], int]:
     offset = (page - 1) * page_size
+
+    if category_id is not None:
+        category = get_category_by_id(db, category_id)
+
+        if category is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Category not found",
+            )
 
     blogs = get_all_blogs(
         db,
         offset=offset,
         limit=page_size,
         search=search,
+        category_id=category_id,
     )
 
     total_items = count_blogs(
         db,
         search=search,
+        category_id=category_id,
     )
 
     return blogs, total_items
@@ -62,6 +76,8 @@ def list_blogs(
 def retrieve_blog(
     db: Session,
     blog_id: int,
+    *,
+    increase_views: bool = False,
 ) -> Blog:
     blog = get_blog_by_id(db, blog_id)
 
@@ -69,6 +85,12 @@ def retrieve_blog(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Blog not found",
+        )
+
+    if increase_views:
+        return increment_blog_views(
+            db,
+            blog,
         )
 
     return blog
@@ -139,6 +161,7 @@ def create_new_blog(
     *,
     title: str,
     content: str,
+    category_id: int | None,
     image: UploadFile | None,
     author_id: int,
 ) -> Blog:
@@ -163,6 +186,7 @@ def create_new_blog(
             detail="Content must contain at least 10 characters",
         )
 
+    validate_category(db, category_id)
     image_url = save_uploaded_image(image)
 
     try:
@@ -172,6 +196,7 @@ def create_new_blog(
             content=cleaned_content,
             image_url=image_url,
             author_id=author_id,
+            category_id=category_id,
         )
     except Exception:
         remove_uploaded_image(image_url)
@@ -184,10 +209,12 @@ def update_existing_blog(
     blog_id: int,
     title: str,
     content: str,
+    category_id: int | None,
     image: UploadFile | None,
+    
 ) -> Blog:
     blog = retrieve_blog(db, blog_id)
-
+    validate_category(db, category_id)
     cleaned_title = title.strip()
     cleaned_content = content.strip()
 
@@ -216,13 +243,14 @@ def update_existing_blog(
         new_image_url = save_uploaded_image(image)
 
     try:
-        updated_blog = update_blog(
+     updated_blog = update_blog(
             db,
             blog=blog,
             title=cleaned_title,
             content=cleaned_content,
             image_url=new_image_url,
-        )
+            category_id=category_id,
+)
     except Exception:
         if new_image_url != old_image_url:
             remove_uploaded_image(new_image_url)
@@ -243,3 +271,22 @@ def delete_existing_blog(
 
     delete_blog(db, blog)
     remove_uploaded_image(image_url)
+
+
+def validate_category(
+    db: Session,
+    category_id: int | None,
+) -> None:
+    if category_id is None:
+        return
+
+    category = get_category_by_id(
+        db,
+        category_id,
+    )
+
+    if category is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Category not found",
+        )

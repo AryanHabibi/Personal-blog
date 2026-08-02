@@ -7,11 +7,10 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.auth import router as auth_router
 from app.api.blogs import router as blogs_router
-from app.database.database import Base, SessionLocal, engine
-from app.models.blog import Blog  # noqa: F401
-from app.models.user import User  # noqa: F401
+from app.database.database import SessionLocal
 from app.services.seed_service import seed_admin_user
-
+from app.api.categories import router as categories_router
+from app.api.comments import router as comments_router
 
 UPLOAD_DIRECTORY = Path("app/uploads")
 UPLOAD_DIRECTORY.mkdir(
@@ -22,7 +21,11 @@ UPLOAD_DIRECTORY.mkdir(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    """
+    Seed the default administrator account at startup.
+
+    Database schema changes are managed by Alembic.
+    """
 
     db = SessionLocal()
 
@@ -65,7 +68,8 @@ app.mount(
 
 app.include_router(auth_router)
 app.include_router(blogs_router)
-
+app.include_router(categories_router)
+app.include_router(comments_router)
 
 @app.get(
     "/",

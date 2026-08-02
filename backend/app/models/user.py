@@ -10,6 +10,7 @@ from app.database.database import Base
 
 if TYPE_CHECKING:
     from app.models.blog import Blog
+    from app.models.comment import Comment
 
 
 class User(Base):
@@ -41,9 +42,9 @@ class User(Base):
 
     role: Mapped[str] = mapped_column(
         String(20),
+        nullable=False,
         default="user",
         server_default="user",
-        nullable=False,
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -54,5 +55,10 @@ class User(Base):
 
     blogs: Mapped[list["Blog"]] = relationship(
         back_populates="author",
+        cascade="all, delete-orphan",
+    )
+
+    comments: Mapped[list["Comment"]] = relationship(
+        back_populates="user",
         cascade="all, delete-orphan",
     )
