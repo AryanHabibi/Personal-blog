@@ -28,6 +28,9 @@ const categorySelect =
 const imageInput =
     document.getElementById("image");
 
+const imagePreview =
+    document.getElementById("image-preview");
+
 const currentImageSection =
     document.getElementById("current-image-section");
 
@@ -151,6 +154,20 @@ async function loadBlog() {
         pageMessage.textContent = error.message;
     }
 }
+
+
+imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+
+    if (!file) {
+        imagePreview.classList.add("hidden");
+        imagePreview.removeAttribute("src");
+        return;
+    }
+
+    imagePreview.src = URL.createObjectURL(file);
+    imagePreview.classList.remove("hidden");
+});
 
 
 editBlogForm.addEventListener(

@@ -211,7 +211,6 @@ def update_existing_blog(
     content: str,
     category_id: int | None,
     image: UploadFile | None,
-    
 ) -> Blog:
     blog = retrieve_blog(db, blog_id)
     validate_category(db, category_id)
@@ -243,14 +242,14 @@ def update_existing_blog(
         new_image_url = save_uploaded_image(image)
 
     try:
-     updated_blog = update_blog(
+        updated_blog = update_blog(
             db,
             blog=blog,
             title=cleaned_title,
             content=cleaned_content,
             image_url=new_image_url,
             category_id=category_id,
-)
+        )
     except Exception:
         if new_image_url != old_image_url:
             remove_uploaded_image(new_image_url)

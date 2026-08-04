@@ -16,6 +16,26 @@ const categorySelect =
 const logoutButton =
     document.getElementById("logout-button");
 
+const imageInput =
+    document.getElementById("image");
+
+const imagePreview =
+    document.getElementById("image-preview");
+
+
+imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+
+    if (!file) {
+        imagePreview.classList.add("hidden");
+        imagePreview.removeAttribute("src");
+        return;
+    }
+
+    imagePreview.src = URL.createObjectURL(file);
+    imagePreview.classList.remove("hidden");
+});
+
 
 function extractItems(data) {
     if (Array.isArray(data)) {
@@ -109,9 +129,6 @@ createBlogForm.addEventListener(
             "category_id",
             categorySelect.value
         );
-
-        const imageInput =
-            document.getElementById("image");
 
         if (imageInput.files.length > 0) {
             formData.append(

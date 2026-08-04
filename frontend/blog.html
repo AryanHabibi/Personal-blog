@@ -10,38 +10,58 @@
 
     <title>Blog | Blog Management</title>
 
+    <meta
+        name="description"
+        content="Read the full article and join the discussion in the comments."
+    >
+
+    <link
+        rel="icon"
+        type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232563eb'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial, sans-serif' font-weight='800' fill='white' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E"
+    >
+
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
     <header class="site-header">
-        <div>
-            <h1>Blog Management</h1>
-            <p id="blog-page-user">Loading account...</p>
-        </div>
+        <a class="site-brand" href="index.html">
+            <span class="brand-icon">B</span>
+
+            <span>
+                <strong>Blog Management</strong>
+                <small>Reading an article</small>
+            </span>
+        </a>
 
         <nav class="header-actions">
-            <a class="secondary-link" href="index.html">
+            <a class="nav-link" href="index.html">
                 Home
             </a>
 
             <a
                 id="dashboard-link"
-                class="secondary-link hidden"
+                class="nav-link hidden"
                 href="dashboard.html"
             >
                 Dashboard
             </a>
 
-            <button id="logout-button" type="button">
+            <button id="logout-button" class="outline-button hidden" type="button">
                 Logout
             </button>
         </nav>
     </header>
 
     <main class="page-container">
-        <p id="blog-message">Loading blog...</p>
+        <div class="page-heading">
+            <h1>Blog article</h1>
+            <p id="blog-page-user">Loading account...</p>
+        </div>
+
+        <p id="blog-message" class="state-message">Loading blog...</p>
 
         <article id="blog-details" class="blog-details hidden">
             <img
@@ -86,6 +106,8 @@
                     required
                 ></textarea>
 
+                <span id="comment-counter" class="char-counter">0 / 1000</span>
+
                 <button
                     id="comment-button"
                     class="primary-button"
@@ -101,7 +123,7 @@
                 ></p>
             </form>
 
-            <p id="comments-message">Loading comments...</p>
+            <p id="comments-message" class="state-message">Loading comments...</p>
 
             <div id="comments-container" class="comments-list"></div>
         </section>

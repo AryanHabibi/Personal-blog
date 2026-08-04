@@ -46,6 +46,9 @@ const commentButton =
 const commentMessage =
     document.getElementById("comment-message");
 
+const commentCounter =
+    document.getElementById("comment-counter");
+
 const commentsMessage =
     document.getElementById("comments-message");
 
@@ -295,6 +298,18 @@ async function loadComments() {
 }
 
 
+function updateCommentCounter() {
+    commentCounter.textContent =
+        `${commentContent.value.length} / 1000`;
+}
+
+
+commentContent.addEventListener(
+    "input",
+    updateCommentCounter
+);
+
+
 commentForm.addEventListener(
     "submit",
     async (event) => {
@@ -346,6 +361,7 @@ commentForm.addEventListener(
             );
 
             commentContent.value = "";
+            updateCommentCounter();
 
             commentMessage.style.color =
                 "#16a34a";

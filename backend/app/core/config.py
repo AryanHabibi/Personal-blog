@@ -43,5 +43,22 @@ class Settings:
         "Admin123!",
     )
 
+    CORS_ORIGINS: list[str] = [
+        origin.strip()
+        for origin in os.getenv(
+            "CORS_ORIGINS",
+            "http://127.0.0.1:5500,http://localhost:5500,"
+            "http://127.0.0.1:3000,http://localhost:3000",
+        ).split(",")
+        if origin.strip()
+    ]
+
 
 settings = Settings()
+
+if not settings.SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY is not set. Add a SECRET_KEY value to your "
+        ".env file before starting the API — without it, JWTs "
+        "would be signed with an empty key."
+    )

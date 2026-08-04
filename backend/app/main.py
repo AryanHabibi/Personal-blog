@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.auth import router as auth_router
 from app.api.blogs import router as blogs_router
+from app.core.config import settings
 from app.database.database import SessionLocal
 from app.services.seed_service import seed_admin_user
 from app.api.categories import router as categories_router
@@ -47,12 +48,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "http://127.0.0.1:3000",
-        "http://localhost:3000",
-    ],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

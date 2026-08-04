@@ -1,0 +1,195 @@
+@baseUrl = http://127.0.0.1:8000
+
+#################################################
+### Health
+#################################################
+
+GET {{baseUrl}}/health
+
+###
+
+GET {{baseUrl}}/
+
+#################################################
+### Register
+#################################################
+
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "Ali",
+  "email": "ali@test.com",
+  "password": "Password123!"
+}
+
+###
+
+#################################################
+### Login
+#################################################
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username=Ali&
+password=Password123!
+
+###
+
+#################################################
+### Copy your JWT here after login
+#################################################
+
+@token = PASTE_YOUR_TOKEN_HERE
+
+#################################################
+### Current User
+#################################################
+
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+###
+
+#################################################
+### Admin Check
+#################################################
+
+GET {{baseUrl}}/auth/admin-check
+Authorization: Bearer {{token}}
+
+###
+
+#################################################
+### Categories
+#################################################
+
+GET {{baseUrl}}/categories
+
+###
+
+GET {{baseUrl}}/categories/1
+
+###
+
+POST {{baseUrl}}/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Programming"
+}
+
+###
+
+PUT {{baseUrl}}/categories/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Python"
+}
+
+###
+
+DELETE {{baseUrl}}/categories/1
+Authorization: Bearer {{token}}
+
+#################################################
+### Blogs
+#################################################
+
+GET {{baseUrl}}/blogs
+
+###
+
+GET {{baseUrl}}/blogs/1
+
+###
+
+GET {{baseUrl}}/blogs?page=1&page_size=10
+
+###
+
+GET {{baseUrl}}/blogs?search=python
+
+###
+
+GET {{baseUrl}}/blogs?category_id=1
+
+###
+
+POST {{baseUrl}}/blogs
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="title"
+
+My HTTP Blog
+--boundary
+Content-Disposition: form-data; name="content"
+
+Created using api.http
+--boundary
+Content-Disposition: form-data; name="category_id"
+
+1
+--boundary--
+
+###
+
+PUT {{baseUrl}}/blogs/1
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="title"
+
+Updated Blog
+--boundary
+Content-Disposition: form-data; name="content"
+
+Updated content
+--boundary
+Content-Disposition: form-data; name="category_id"
+
+1
+--boundary--
+
+###
+
+DELETE {{baseUrl}}/blogs/1
+Authorization: Bearer {{token}}
+
+#################################################
+### Comments
+#################################################
+
+GET {{baseUrl}}/comments/blog/1
+
+###
+
+POST {{baseUrl}}/comments/blog/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Nice article!"
+}
+
+###
+
+PUT {{baseUrl}}/comments/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "Edited comment."
+}
+
+###
+
+DELETE {{baseUrl}}/comments/1
+Authorization: Bearer {{token}}

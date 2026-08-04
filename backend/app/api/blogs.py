@@ -223,7 +223,6 @@ def update_blog(
         int | None,
         Form(),
     ] = None,
-        
 ) -> BlogResponse:
     """
     Update an existing blog.

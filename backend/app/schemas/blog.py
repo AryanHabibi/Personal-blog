@@ -3,6 +3,8 @@ from math import ceil
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.category import CategoryResponse
+
 
 class BlogCreate(BaseModel):
     title: str = Field(
@@ -27,10 +29,13 @@ class BlogResponse(BaseModel):
     title: str
     content: str
     image_url: str | None
+    view_count: int
     created_at: datetime
     updated_at: datetime
     author_id: int
     author: BlogAuthorResponse
+    category_id: int | None
+    category: CategoryResponse | None
 
 
 class BlogListResponse(BaseModel):
