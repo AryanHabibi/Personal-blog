@@ -26,3 +26,13 @@ class UserOut(BaseModel):
     date_of_birth: date | None
     gender: str | None
     created_at: datetime
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
