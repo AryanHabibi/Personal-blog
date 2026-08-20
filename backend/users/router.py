@@ -3,6 +3,7 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from core.dependencies import get_current_user
 from core.email import send_verification_email
 from core.security import create_token, decode_token, hash_password, verify_password
 from database import get_db
@@ -78,3 +79,8 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
         purpose="login",
     )
     return Token(access_token=access_token)
+
+
+@router.get("/me", response_model=UserOut)
+def get_me(current_user: User = Depends(get_current_user)):
+    return current_user
