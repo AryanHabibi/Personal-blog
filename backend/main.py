@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from blogs.models import Blog  # noqa: F401  (import registers the table with Base.metadata)
+from blogs.router import router as blogs_router
 from categories.models import Category  # noqa: F401  (import registers the table with Base.metadata)
 from categories.router import router as categories_router
 from database import Base, engine
@@ -11,6 +13,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Weblog API")
 app.include_router(users_router)
 app.include_router(categories_router)
+app.include_router(blogs_router)
 
 
 @app.get("/")
