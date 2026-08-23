@@ -8,6 +8,9 @@ from config import settings
 def send_verification_email(to_email: str, token: str) -> None:
     verify_link = f"{settings.app_base_url}/users/verify?token={token}"
 
+    if settings.environment == "development":
+        print(f"[DEV] Verification link for {to_email}: {verify_link}")
+
     message = MIMEMultipart("alternative")
     message["Subject"] = "Verify your Weblog account"
     message["From"] = settings.smtp_from_email
