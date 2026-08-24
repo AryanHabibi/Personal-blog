@@ -12,6 +12,7 @@ class UserCreate(BaseModel):
     last_name: str | None = None
     date_of_birth: date | None = None
     gender: str | None = None
+    bio: str | None = None
 
 
 class UserOut(BaseModel):
@@ -25,7 +26,16 @@ class UserOut(BaseModel):
     last_name: str | None
     date_of_birth: date | None
     gender: str | None
+    bio: str | None
     created_at: datetime
+
+
+class UserUpdate(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    date_of_birth: date | None = None
+    gender: str | None = None
+    bio: str | None = None
 
 
 class UserLogin(BaseModel):
@@ -36,3 +46,11 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class AdminBioOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    first_name: str | None
+    last_name: str | None
+    bio: str | None

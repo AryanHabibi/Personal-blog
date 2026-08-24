@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Enum, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Enum, Integer, String, Text
 
 from database import Base
 
@@ -23,4 +23,5 @@ class User(Base):
     last_name = Column(String, nullable=True)
     date_of_birth = Column(Date, nullable=True)
     gender = Column(String, nullable=True)
+    bio = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

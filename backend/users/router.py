@@ -3,12 +3,14 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from core.dependencies import get_current_user
+from comments.models import Comment
+from core.dependencies import get_current_user, require_role
 from core.email import send_verification_email
 from core.security import create_token, decode_token, hash_password, verify_password
+from dashboard.models import Message, SavedBlog
 from database import get_db
-from users.models import User
-from users.schemas import Token, UserCreate, UserLogin, UserOut
+from users.models import User, UserRole
+from users.schemas import AdminBioOut, Token, UserCreate, UserLogin, UserOut, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -29,6 +31,7 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
         last_name=payload.last_name,
         date_of_birth=payload.date_of_birth,
         gender=payload.gender,
+        bio=payload.bio,
     )
     db.add(user)
     db.commit()
@@ -84,3 +87,46 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.put("/me", response_model=UserOut)
+def update_me(
+    payload: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    update_data = payload.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.get("/admin", response_model=AdminBioOut)
+def get_admin_bio(db: Session = Depends(get_db)):
+    admin = db.query(User).filter(User.role == UserRole.ADMIN).first()
+    if not admin:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Admin not found")
+    return admin
+
+
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
+)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if user.role != UserRole.REGULAR:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete an admin account")
+
+    db.query(Comment).filter(Comment.user_id == user_id).delete()
+    db.query(SavedBlog).filter(SavedBlog.user_id == user_id).delete()
+    db.query(Message).filter(Message.user_id == user_id).delete()
+    db.delete(user)
+    db.commit()
