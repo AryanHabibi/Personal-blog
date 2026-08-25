@@ -13,7 +13,7 @@ class Blog(Base):
     title = Column(String, nullable=False, index=True)
     content = Column(Text, nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     category = relationship("Category")
