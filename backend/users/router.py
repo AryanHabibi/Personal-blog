@@ -97,7 +97,7 @@ def update_me(
 ):
     update_data = payload.model_dump(exclude_unset=True)
 
-    if "bio" in update_data and current_user.role != UserRole.ADMIN:
+    if update_data.get("bio") and current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the admin account can set a bio")
 
     for field, value in update_data.items():

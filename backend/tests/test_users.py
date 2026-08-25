@@ -131,6 +131,19 @@ def test_update_me_bio_forbidden_for_regular(client, regular_token):
     assert response.status_code == 403
 
 
+def test_update_me_full_profile_with_null_bio_allowed_for_regular(client, regular_token):
+    # A full-profile form naturally includes every field, even ones it never
+    # intends to touch -- bio: null here must not be treated as "trying to
+    # set a bio."
+    response = client.put(
+        "/users/me",
+        json={"first_name": "Regular", "last_name": "User", "gender": None, "bio": None},
+        headers={"Authorization": f"Bearer {regular_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["first_name"] == "Regular"
+
+
 def test_update_me_bio_allowed_for_admin(client, admin_token):
     response = client.put(
         "/users/me",
