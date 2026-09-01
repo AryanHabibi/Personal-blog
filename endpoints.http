@@ -1,0 +1,339 @@
+# weblog API - manual endpoint checks
+#
+# Works with the VS Code "REST Client" extension and JetBrains' HTTP Client.
+# Set up the schema, then run the server (both from api/):
+#   ../venv/bin/alembic upgrade head
+#   ../venv/bin/uvicorn app.main:app --reload
+# Then click "Send Request" above each block, top to bottom - the login blocks
+# are named so the token variables below fill in automatically.
+#
+# The feed is empty until the admin creates posts (see the admin-only section).
+
+@baseUrl = http://localhost:8000
+@username = Sana
+@password = secret1
+@slug = my-first-post
+
+
+### >>> LOGIN AS SANA - fully hardcoded, just click "Send Request" above this line
+POST http://localhost:8000/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username=Sana&password=secret1
+
+
+### Health check
+GET {{baseUrl}}/health
+
+
+### Register - minimal (username, password, first_name, last_name, email)
+# email is REQUIRED. Login is blocked (403) until it is verified; with
+# EMAIL_BACKEND=console the confirmation link prints to the server terminal.
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}",
+  "first_name": "Alice",
+  "last_name": "Ng",
+  "email": "alice.ng@example.com"
+}
+
+
+### Register - full profile (extra fields optional)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "sara",
+  "password": "secret1",
+  "first_name": "Sara",
+  "last_name": "Ahmadi",
+  "email": "sara.ahmadi@example.com",
+  "gender": "female",
+  "date_of_birth": "1994-03-21",
+  "country": "IR",
+  "phone_number": "+98 912 555 0000"
+}
+
+
+### Verify the email  (paste the token from the server log)
+GET {{baseUrl}}/auth/verify-email?token=PASTE_TOKEN_HERE
+
+
+### Resend the confirmation link  (always 200, even for unknown addresses)
+POST {{baseUrl}}/auth/verify-email/resend
+Content-Type: application/json
+
+{ "email": "sara.ahmadi@example.com" }
+
+
+### Login as the regular user  -> access + refresh token
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username=Sana&password=secret1
+
+@accessToken = {{login.response.body.access_token}}
+@refreshToken = {{login.response.body.refresh_token}}
+
+
+### Login as the admin  (credentials come from api/app/.env)
+# @name adminLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username=Aryan&password=QAZWSX123
+
+@adminAccessToken = {{adminLogin.response.body.access_token}}
+
+
+### Refresh  -> new pair, old refresh token is revoked (rotation)
+# @name refresh
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refreshToken}}"
+}
+
+@accessToken2 = {{refresh.response.body.access_token}}
+@refreshToken2 = {{refresh.response.body.refresh_token}}
+
+
+### Reuse the OLD refresh token  -> 401 (and revokes the whole family)
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refreshToken}}"
+}
+
+
+### List posts - paginated, 10 per page
+GET {{baseUrl}}/blog/posts?page=1
+Authorization: Bearer {{accessToken}}
+
+
+### List posts - page 2
+GET {{baseUrl}}/blog/posts?page=2
+Authorization: Bearer {{accessToken}}
+
+
+### List posts without a token  -> 401
+GET {{baseUrl}}/blog/posts
+
+
+### Search posts by title / content
+GET {{baseUrl}}/blog/posts/search?q=python&page=1
+Authorization: Bearer {{accessToken}}
+
+
+### Get a single post by slug  (404 if it does not exist)
+GET {{baseUrl}}/blog/posts/{{slug}}
+Authorization: Bearer {{accessToken}}
+
+
+###############################################################################
+# Blog writes - ADMIN ONLY. A regular user's token here returns 403.
+# Run the "adminLogin" block above first.
+###############################################################################
+
+# Create / edit are multipart/form-data. Put a real image next to this file
+# (e.g. ./pic.png) - the `< ./pic.png` lines below stream it as the upload.
+
+### Create a post  (picture required; slug derived from the title)
+POST {{baseUrl}}/blog/posts
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: multipart/form-data; boundary=----wapi
+
+------wapi
+Content-Disposition: form-data; name="title"
+
+My first post
+------wapi
+Content-Disposition: form-data; name="content"
+
+Hello from the admin.
+------wapi
+Content-Disposition: form-data; name="image"; filename="pic.png"
+Content-Type: image/png
+
+< ./pic.png
+------wapi--
+
+
+### Fetch that post's picture (bytes)
+GET {{baseUrl}}/blog/posts/my-first-post/image
+Authorization: Bearer {{accessToken}}
+
+
+### Create without a picture  -> 422
+POST {{baseUrl}}/blog/posts
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: multipart/form-data; boundary=----wapi
+
+------wapi
+Content-Disposition: form-data; name="title"
+
+No picture
+------wapi
+Content-Disposition: form-data; name="content"
+
+should be rejected
+------wapi--
+
+
+### Create as a regular user  -> 403
+POST {{baseUrl}}/blog/posts
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=----wapi
+
+------wapi
+Content-Disposition: form-data; name="title"
+
+nope
+------wapi
+Content-Disposition: form-data; name="content"
+
+should be rejected
+------wapi
+Content-Disposition: form-data; name="image"; filename="pic.png"
+Content-Type: image/png
+
+< ./pic.png
+------wapi--
+
+
+### Edit a post  (text only; omit `image` to keep the current picture)
+PUT {{baseUrl}}/blog/posts/my-first-post
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: multipart/form-data; boundary=----wapi
+
+------wapi
+Content-Disposition: form-data; name="title"
+
+My first post (edited)
+------wapi
+Content-Disposition: form-data; name="content"
+
+Updated body.
+------wapi--
+
+
+### Delete a post  -> 204
+DELETE {{baseUrl}}/blog/posts/about-python
+Authorization: Bearer {{adminAccessToken}}
+
+
+### Delete again  -> 404
+DELETE {{baseUrl}}/blog/posts/about-python
+Authorization: Bearer {{adminAccessToken}}
+
+
+###############################################################################
+# Reactions - either role. `slug` below points at a post you have created.
+###############################################################################
+
+### Like a post
+PUT {{baseUrl}}/blog/posts/{{slug}}/reaction
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "value": "like" }
+
+
+### Send the same reaction again -> clears it (toggle off)
+PUT {{baseUrl}}/blog/posts/{{slug}}/reaction
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "value": "like" }
+
+
+### Switch to a dislike
+PUT {{baseUrl}}/blog/posts/{{slug}}/reaction
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "value": "dislike" }
+
+
+### Explicitly clear my reaction
+DELETE {{baseUrl}}/blog/posts/{{slug}}/reaction
+Authorization: Bearer {{accessToken}}
+
+
+### Post read now carries likes / dislikes / my_reaction
+GET {{baseUrl}}/blog/posts/{{slug}}
+Authorization: Bearer {{accessToken}}
+
+
+###############################################################################
+# Comments
+#   create top-level ... either role
+#   reply (parent_id) .. admin only
+#   edit .............. admin only, own comment only
+#   delete ........... own (either role), or any (admin)
+###############################################################################
+
+### Create a top-level comment as a regular user
+# @name comment
+POST {{baseUrl}}/blog/posts/{{slug}}/comments
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "body": "First!" }
+
+@commentId = {{comment.response.body.id}}
+
+
+### Regular user tries to reply -> 403
+POST {{baseUrl}}/blog/posts/{{slug}}/comments
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "body": "a reply", "parent_id": {{commentId}} }
+
+
+### Admin replies to that comment -> 201
+POST {{baseUrl}}/blog/posts/{{slug}}/comments
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+
+{ "body": "admin replying", "parent_id": {{commentId}} }
+
+
+### List comments (flat, oldest first; parent_id gives the thread shape)
+GET {{baseUrl}}/blog/posts/{{slug}}/comments?page=1
+Authorization: Bearer {{accessToken}}
+
+
+### Regular user edits own comment -> 403 (literal spec: no editing)
+PUT {{baseUrl}}/blog/comments/{{commentId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "body": "edited" }
+
+
+### Regular user deletes own comment -> 204 (also removes any replies)
+DELETE {{baseUrl}}/blog/comments/{{commentId}}
+Authorization: Bearer {{accessToken}}
+
+
+### Logout - revokes this access token + the given refresh token
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refreshToken}}"
+}
+
+
+### After logout the access token is rejected  -> 401
+GET {{baseUrl}}/blog/posts
+Authorization: Bearer {{accessToken}}
