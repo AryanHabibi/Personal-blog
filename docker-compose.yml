@@ -42,8 +42,8 @@ services:
   nginx:
     image: nginx:1.27-alpine
     volumes:
-      - ./api/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./api/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./api/app/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./api/app/nginx/conf.d:/etc/nginx/conf.d:ro
     ports:
       - "80:80"
     depends_on:

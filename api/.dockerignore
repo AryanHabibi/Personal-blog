@@ -24,7 +24,7 @@ htmlcov/
 uploads/
 
 # Nginx config - mounted into the nginx service, not part of the api image
-nginx/
+**/nginx/
 
 # Secrets - real config is injected as env vars / .env.prod at runtime
 **/.env
