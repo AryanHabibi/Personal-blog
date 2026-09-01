@@ -23,6 +23,9 @@ htmlcov/
 # Uploaded post images (runtime state, never baked in)
 uploads/
 
+# Nginx config - mounted into the nginx service, not part of the api image
+nginx/
+
 # Secrets - real config is injected as env vars / .env.prod at runtime
 **/.env
 **/.env.*
