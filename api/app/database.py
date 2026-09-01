@@ -10,7 +10,13 @@ settings = get_settings()
 connect_args = (
     {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
 )
-engine = create_engine(settings.database_url, connect_args=connect_args)
+engine = create_engine(
+    settings.database_url,
+    connect_args=connect_args,
+    # Drop connections the server closed out from under us (idle timeouts,
+    # restarts) instead of handing a dead one to a request.
+    pool_pre_ping=not settings.database_url.startswith("sqlite"),
+)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 # Deterministic constraint/index names so Alembic autogenerate and SQLite

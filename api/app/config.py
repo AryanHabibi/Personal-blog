@@ -10,8 +10,9 @@ ENV_FILE = Path(__file__).resolve().parent / ".env"
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=str(ENV_FILE), extra="ignore")
 
-    # Database
-    database_url: str = "sqlite:///./app.db"
+    # Database. Postgres by default; override with sqlite:///./app.db for a
+    # zero-setup local fallback.
+    database_url: str = "postgresql+psycopg://weblog:weblog@localhost:5432/weblog"
 
     # Single admin account (no DB row) - credentials come from .env
     admin_username: str
