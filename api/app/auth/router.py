@@ -6,7 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.auth import service
 from app.auth.schema import (
+    ChangePassword,
     LogoutRequest,
+    MeOut,
     MessageOut,
     RefreshRequest,
     ResendVerification,
@@ -68,6 +70,40 @@ def resend_verification(data: ResendVerification, db: DB):
     return MessageOut(
         detail="If that address is registered and unverified, a new link has been sent."
     )
+
+
+@router.get("/me", response_model=MeOut)
+def read_me(
+    current: Annotated[CurrentUser, Depends(get_current_user)],
+    db: DB,
+):
+    """The signed-in user's own profile: email, name, and profile fields.
+    The admin (no DB row) gets just username + role."""
+    me = service.get_me(db, current.username, current.is_admin)
+    if me is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    return me
+
+
+@router.post("/change-password", response_model=MessageOut)
+def change_password(
+    data: ChangePassword,
+    current: Annotated[CurrentUser, Depends(get_current_user)],
+    db: DB,
+):
+    """Change your own password. Requires the current password; on success
+    every existing session (refresh token) for the account is revoked."""
+    try:
+        service.change_password(
+            db,
+            current.username,
+            current.is_admin,
+            data.current_password,
+            data.new_password,
+        )
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
+    return MessageOut(detail="Password changed. Please log in again.")
 
 
 @router.post("/refresh", response_model=TokenPair)

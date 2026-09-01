@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app import mailer
 from app.auth.model import EmailVerificationToken, RefreshToken, User
-from app.auth.schema import UserRegister
+from app.auth.schema import MeOut, UserRegister
 from app.config import get_settings
 from app.security import (
     REFRESH_TOKEN_TYPE,
@@ -112,6 +112,41 @@ def resend_verification(db: Session, email: str) -> None:
         EmailVerificationToken.used_at.is_(None),
     ).update({"used_at": datetime.now(timezone.utc)})
     _issue_verification(db, user)
+    db.commit()
+
+
+def get_me(db: Session, username: str, is_admin: bool) -> MeOut | None:
+    """Return the signed-in user's own profile. The admin has no DB row,
+    so only username + role are known. Returns None if a regular user's
+    row has since disappeared."""
+    if is_admin:
+        return MeOut(username=username, role="admin")
+    user = db.scalar(select(User).where(User.username == username))
+    if user is None:
+        return None
+    return MeOut.model_validate(user)  # role defaults to "regular"
+
+
+def change_password(
+    db: Session,
+    username: str,
+    is_admin: bool,
+    current_password: str,
+    new_password: str,
+) -> None:
+    """Change a regular user's own password. Every existing refresh token
+    for the account is revoked, so all other sessions are logged out."""
+    if is_admin:
+        raise ValueError("The admin password is managed in api/app/.env")
+    user = db.scalar(select(User).where(User.username == username))
+    if user is None:
+        raise ValueError("User not found")
+    if not verify_password(current_password, user.hashed_password):
+        raise ValueError("Current password is incorrect")
+    if verify_password(new_password, user.hashed_password):
+        raise ValueError("New password must be different from the current one")
+    user.hashed_password = hash_password(new_password)
+    _revoke_all_for_user(db, user.username)
     db.commit()
 
 

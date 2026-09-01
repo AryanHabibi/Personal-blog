@@ -10,16 +10,16 @@
 # The feed is empty until the admin creates posts (see the admin-only section).
 
 @baseUrl = http://localhost:8000
-@username = Sana
-@password = secret1
+@username = Faraz
+@password = secret3
 @slug = my-first-post
 
 
-### >>> LOGIN AS SANA - fully hardcoded, just click "Send Request" above this line
+### >>> LOGIN AS PARSA - fully hardcoded, just click "Send Request" above this line
 POST http://localhost:8000/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-username=Sana&password=secret1
+username=Parsa&password=secret2
 
 
 ### Health check
@@ -33,11 +33,11 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "username": "{{username}}",
-  "password": "{{password}}",
-  "first_name": "Alice",
-  "last_name": "Ng",
-  "email": "alice.ng@example.com"
+  "username": "Faraz",
+  "password": "secret3",
+  "first_name": "Faraz",
+  "last_name": "Sabalani",
+  "email": "faraz.sabalani@example.com"
 }
 
 
@@ -59,14 +59,14 @@ Content-Type: application/json
 
 
 ### Verify the email  (paste the token from the server log)
-GET {{baseUrl}}/auth/verify-email?token=PASTE_TOKEN_HERE
+GET {{baseUrl}}/auth/verify-email?token=3EtOsxDlIqhJh9_a8ZQOMg0vTdtbpkP1ZuBMoXeyiD4
 
 
 ### Resend the confirmation link  (always 200, even for unknown addresses)
 POST {{baseUrl}}/auth/verify-email/resend
 Content-Type: application/json
 
-{ "email": "sara.ahmadi@example.com" }
+{ "email": "faraz.sabalani@example.com" }
 
 
 ### Login as the regular user  -> access + refresh token
@@ -74,8 +74,9 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-username=Sana&password=secret1
+username=Faraz&password=secret3
 
+###
 @accessToken = {{login.response.body.access_token}}
 @refreshToken = {{login.response.body.refresh_token}}
 
@@ -87,7 +88,30 @@ Content-Type: application/x-www-form-urlencoded
 
 username=Aryan&password=QAZWSX123
 
+###
 @adminAccessToken = {{adminLogin.response.body.access_token}}
+
+
+### My profile  -> the signed-in user's own info (email, name, profile fields)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{accessToken}}
+
+
+### My profile as the admin  -> just username + role (admin has no DB row)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{adminAccessToken}}
+
+
+### Change my password  (needs the current one; revokes all my sessions)
+# After this, re-run the "login" block with the new password.
+POST {{baseUrl}}/auth/change-password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "current_password": "secret3",
+  "new_password": "secret3-new"
+}
 
 
 ### Refresh  -> new pair, old refresh token is revoked (rotation)
@@ -99,6 +123,7 @@ Content-Type: application/json
   "refresh_token": "{{refreshToken}}"
 }
 
+###
 @accessToken2 = {{refresh.response.body.access_token}}
 @refreshToken2 = {{refresh.response.body.refresh_token}}
 
@@ -161,7 +186,7 @@ Hello from the admin.
 Content-Disposition: form-data; name="image"; filename="pic.png"
 Content-Type: image/png
 
-< ./pic.png
+< .//Users/aryanhabibi/Desktop/Hello.jpg
 ------wapi--
 
 
@@ -287,6 +312,7 @@ Content-Type: application/json
 
 { "body": "First!" }
 
+###
 @commentId = {{comment.response.body.id}}
 
 

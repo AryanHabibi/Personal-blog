@@ -96,6 +96,31 @@ class UserOut(BaseModel):
     created_at: datetime
 
 
+class MeOut(BaseModel):
+    """The signed-in user's own view. Regular users get the full profile;
+    the admin (no DB row) gets just username + role."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    username: str
+    role: str = "regular"
+    id: int | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    email: EmailStr | None = None
+    email_verified: bool | None = None
+    gender: Gender | None = None
+    date_of_birth: date | None = None
+    country: str | None = None
+    phone_number: str | None = None
+    created_at: datetime | None = None
+
+
+class ChangePassword(BaseModel):
+    current_password: str = Field(min_length=1, max_length=128)
+    new_password: str = Field(min_length=6, max_length=128)
+
+
 class ResendVerification(BaseModel):
     email: EmailStr
 
