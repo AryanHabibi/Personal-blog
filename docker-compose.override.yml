@@ -1,0 +1,23 @@
+# Development overrides. Loaded automatically by `docker compose up` (no -f).
+# Swaps api to the single-stage dev image with hot reload, bind-mounts the
+# source tree, loads the dev .env, and publishes ports for host access.
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    env_file:
+      - ./api/app/.env
+    environment:
+      # Apply migrations on start; prod uses a dedicated one-shot service.
+      RUN_MIGRATIONS: "1"
+    volumes:
+      - ./api:/code
+    ports:
+      - "8000:8000"
+
+  db:
+    ports:
+      - "5432:5432"

@@ -1,0 +1,54 @@
+name: weblog
+
+# Base topology (db + api + nginx). Always combined with an override:
+#   dev  : docker compose up                 (+ docker-compose.override.yml, auto)
+#   prod : docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# The overrides supply the app's env file (.env for dev, .env.prod for prod),
+# so the base intentionally carries only the DB wiring.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: weblog
+      POSTGRES_PASSWORD: weblog
+      POSTGRES_DB: weblog
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weblog -d weblog"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      # Reach Postgres over the compose network. Overrides any DATABASE_URL
+      # in the env file (that value is for bare-metal runs).
+      DATABASE_URL: postgresql+psycopg://weblog:weblog@db:5432/weblog
+      DB_HOST: db
+      DB_PORT: "5432"
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:

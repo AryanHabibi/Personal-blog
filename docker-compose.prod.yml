@@ -1,0 +1,38 @@
+# Production overrides. Use explicitly (this also bypasses the dev override):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Requires ./api/app/.env.prod (gitignored) with the real secrets:
+#   ADMIN_USERNAME, ADMIN_PASSWORD, JWT_SECRET, APP_BASE_URL, EMAIL_* / SMTP_*
+# Compose errors out if that file is missing - by design.
+#
+# Topology differences from base+dev:
+#   - api runs the multi-stage prod image (gunicorn + uvicorn workers)
+#   - a one-shot `migrate` service applies migrations before api starts,
+#     so multiple api replicas never race on alembic
+#   - the db host port is not published (dev override isn't loaded here)
+
+services:
+  migrate:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    env_file:
+      - ./api/app/.env.prod
+    environment:
+      DATABASE_URL: postgresql+psycopg://weblog:weblog@db:5432/weblog
+      DB_HOST: db
+      DB_PORT: "5432"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    env_file:
+      - ./api/app/.env.prod
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully

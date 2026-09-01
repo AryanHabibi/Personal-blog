@@ -1,0 +1,41 @@
+# Build context is api/. Keep the image small and free of local state.
+
+# Virtualenvs
+venv/
+.venv/
+env/
+ENV/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local databases
+*.db
+*.sqlite3
+
+# Uploaded post images (runtime state, never baked in)
+uploads/
+
+# Secrets - real config is injected as env vars / .env.prod at runtime
+**/.env
+**/.env.*
+!**/.env.example
+
+# VCS / editor / OS
+.git/
+.gitignore
+.idea/
+.vscode/
+.DS_Store
+
+# Docker files themselves
+Dockerfile
+Dockerfile.dev
+.dockerignore

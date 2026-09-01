@@ -12,6 +12,11 @@ app.include_router(auth_router)
 app.include_router(blog_router)
 
 
+@app.get("/", tags=["meta"])
+def root():
+    return "Weblog Api run"
+
+
 @app.get("/health", tags=["meta"])
 def health():
     return {"status": "healthy"}
