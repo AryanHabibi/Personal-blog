@@ -4,9 +4,10 @@
 
 services:
   api:
+    image: weblog-api:dev
     build:
       context: ./api
-      dockerfile: Dockerfile.dev
+      dockerfile: app/Dockerfile.dev
     command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
     env_file:
       - ./api/app/.env
@@ -17,6 +18,16 @@ services:
       - ./api:/code
     ports:
       - "8000:8000"
+
+  nginx:
+    image: weblog-nginx:dev
+    build:
+      context: ./api/nginx
+      dockerfile: Dockerfile.dev
+    # Config is bind-mounted (not baked): edit and `docker compose restart nginx`.
+    volumes:
+      - ./api/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./api/nginx/conf.d:/etc/nginx/conf.d:ro
 
   db:
     ports:

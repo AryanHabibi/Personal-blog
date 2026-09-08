@@ -23,9 +23,10 @@ services:
     restart: unless-stopped
 
   api:
+    image: weblog-api
     build:
       context: ./api
-      dockerfile: Dockerfile
+      dockerfile: app/Dockerfile
     environment:
       # Reach Postgres over the compose network. Overrides any DATABASE_URL
       # in the env file (that value is for bare-metal runs).
@@ -40,10 +41,10 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: nginx:1.27-alpine
-    volumes:
-      - ./api/app/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./api/app/nginx/conf.d:/etc/nginx/conf.d:ro
+    image: weblog-nginx
+    build:
+      context: ./api/nginx
+      dockerfile: Dockerfile
     ports:
       - "80:80"
     depends_on:

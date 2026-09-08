@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1
+
+# Development nginx: the config is NOT baked in. docker-compose.override.yml
+# bind-mounts nginx.conf and conf.d/ over /etc/nginx, so edits take effect on
+#   docker compose restart nginx
+# with no rebuild. Mirrors how the app dev image treats its source.
+FROM nginx:1.27-alpine
+
+RUN rm -f /etc/nginx/conf.d/default.conf
+
+EXPOSE 80

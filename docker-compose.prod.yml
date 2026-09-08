@@ -13,9 +13,10 @@
 
 services:
   migrate:
+    image: weblog-api:prod
     build:
       context: ./api
-      dockerfile: Dockerfile
+      dockerfile: app/Dockerfile
     command: ["alembic", "upgrade", "head"]
     env_file:
       - ./api/app/.env.prod
@@ -29,6 +30,7 @@ services:
     restart: "no"
 
   api:
+    image: weblog-api:prod
     env_file:
       - ./api/app/.env.prod
     depends_on:
@@ -36,3 +38,6 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+
+  nginx:
+    image: weblog-nginx:prod

@@ -1,0 +1,4 @@
+# Build context is api/nginx/. Only the config belongs in the image.
+Dockerfile
+Dockerfile.dev
+.dockerignore

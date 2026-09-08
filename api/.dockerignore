@@ -23,7 +23,7 @@ htmlcov/
 # Uploaded post images (runtime state, never baked in)
 uploads/
 
-# Nginx config - mounted into the nginx service, not part of the api image
+# Nginx has its own build context (api/nginx/); not part of the api image
 **/nginx/
 
 # Secrets - real config is injected as env vars / .env.prod at runtime
@@ -38,7 +38,7 @@ uploads/
 .vscode/
 .DS_Store
 
-# Docker files themselves
-Dockerfile
-Dockerfile.dev
-.dockerignore
+# Docker files themselves (now under app/)
+**/Dockerfile
+**/Dockerfile.dev
+**/.dockerignore
