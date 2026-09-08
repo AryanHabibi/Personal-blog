@@ -27,7 +27,7 @@ class UserRegister(BaseModel):
     gender: Gender | None = None
     date_of_birth: date | None = None
     country: str | None = Field(
-        default=None, description="ISO 3166-1 alpha-2 country code, e.g. US"
+        default=None, description="Country name, e.g. Iran or United States"
     )
     phone_number: str | None = Field(default=None, max_length=20)
 
@@ -46,12 +46,16 @@ class UserRegister(BaseModel):
 
     @field_validator("country")
     @classmethod
-    def _country_code(cls, v: str | None) -> str | None:
+    def _tidy_country(cls, v: str | None) -> str | None:
         if v is None:
             return None
-        v = v.strip().upper()
-        if len(v) != 2 or not v.isalpha():
-            raise ValueError("country must be a 2-letter ISO code, e.g. US")
+        v = " ".join(v.split())  # trim + collapse inner whitespace, keep casing
+        if not v:
+            return None
+        if not 2 <= len(v) <= 60:
+            raise ValueError("country must be between 2 and 60 characters")
+        if not any(ch.isalpha() for ch in v):
+            raise ValueError("country must contain letters")
         return v
 
     @field_validator("phone_number")

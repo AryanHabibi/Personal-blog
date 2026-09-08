@@ -28,7 +28,7 @@ class User(Base):
     )
     gender: Mapped[str | None] = mapped_column(String(20))
     date_of_birth: Mapped[date | None] = mapped_column(Date)
-    country: Mapped[str | None] = mapped_column(String(2))  # ISO 3166-1 alpha-2
+    country: Mapped[str | None] = mapped_column(String(60))  # free-form country name
     phone_number: Mapped[str | None] = mapped_column(String(20))
 
     created_at: Mapped[datetime] = mapped_column(
